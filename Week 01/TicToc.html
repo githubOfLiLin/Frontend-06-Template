@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .cell {
+      display: inline-block;
+      width: 100px;
+      height: 100px;
+      line-height: 100px;
+      font-size: 50px;
+      background-color: green;
+      text-align: center;
+      border: 1px solid black;
+      vertical-align: middle;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div id="board"></div>
+</body>
+<script>
+  const boardData = [
+    0, 0, 0,
+    0, 2, 0,
+    0, 0, 0
+  ];
+  const board = document.getElementById('board');
+  let color = 1;
+  let gameOver = false;
+
+  // 渲染棋盘
+  function show() {
+    board.innerHTML = '';
+    // 使用DocumentFragment，不用每次都直接向棋盘添加棋子，性能优化
+    const cells = document.createDocumentFragment();
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        let cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.textContent = boardData[3 * i + j] === 1 ? 'O' :
+          boardData[3 * i + j] === 2 ? 'X' : '';
+        cell.addEventListener('click', () => move(i, j));
+        cells.appendChild(cell);
+      }
+      cells.appendChild(document.createElement('br'));
+    }
+    board.appendChild(cells);
+  }
+
+  // 落棋子
+  function move(x, y) {
+    if (gameOver) {
+      return;
+    }
+    if (boardData[3 * x + y]) {
+      return;
+    }
+    boardData[3 * x + y] = color;
+    if (check(boardData, color)) {
+      color === 2 ? alert('X win') : alert('O win');
+      gameOver = true;
+      return;
+    };
+    show();
+    color = 3 - color;
+    // 机器根据最优选择去走对手棋
+    computerMove(boardData, color);
+  }
+
+  // 判断结果
+  function check(boardData, color) {
+    for (let i = 0; i < 3; i++) {
+      let win = true;
+      for (let j = 0; j < 3; j++) {
+        if (boardData[3 * i + j] !== color) win = false;
+      }
+      if (win) return true;
+    }
+
+    for (let i = 0; i < 3; i++) {
+      let win = true;
+      for (let j = 0; j < 3; j++) {
+        if (boardData[3 * j + i] !== color) win = false;
+      }
+      if (win) return true;
+    }
+
+    {
+      let win = true;
+      for (let i = 0; i < 3; i++) {
+        if (boardData[i * 3 + i] !== color) win = false;
+      }
+      if (win) return true;
+    }
+
+    {
+      let win = true;
+      for (let i = 0; i < 3; i++) {
+        if (boardData[i * 3 + 2 - i] !== color) win = false;
+      }
+      if (win) return true;
+    }
+  }
+
+  function willWin(boardData, color) {
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        if (boardData[3 * i + j]) {
+          continue;
+        }
+        let tem = deepClone(boardData);
+        tem[3 * i + j] = color;
+        if (check(tem, color)) return [i, j];
+      }
+    }
+    return null;
+  }
+
+  function bestChoice(boardData, color) {
+    // -1:要输了，1:要赢了，0:要和了
+    let p = null;
+    if (p = willWin(boardData, color)) {
+      return {
+        point: p,
+        result: 1
+      }
+    }
+    let result = -2;
+    let point = null;
+    outer: for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        if (boardData[3 * i + j]) continue;
+        let tem = deepClone(boardData);
+        tem[3 * i + j] = color;
+        let r = bestChoice(tem, 3 - color).result;
+        if (-r > result) {
+          result = -r;
+          point = [i, j];
+        }
+        if (result === 1) break outer;
+      }
+    }
+    return {
+      point: point,
+      result: point ? result : 0
+    }
+
+  }
+
+  function computerMove() {
+    let point = bestChoice(boardData, color).point;
+    if (point) {
+
+      boardData[3 * point[0] + point[1]] = color;
+      if (check(boardData, color)) {
+        color === 2 ? alert('X win') : alert('O win');
+      }
+      color = 3 - color;
+      show();
+    }
+  }
+
+  function deepClone(obj) {
+    // 改成一维数组之后就可以使用该方法进行深拷贝，即继承了之前对象方法也继承了里面的数据
+    return Object.create(obj);
+    // return JSON.parse(JSON.stringify(obj));
+  }
+  show();
+</script>
+
+</html>
