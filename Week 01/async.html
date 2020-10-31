@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .container {
+      display: flex;
+      align-items: center;
+    }
+
+    .lamp {
+      width: 200px;
+      height: 200px;
+      border-radius: 100px;
+      margin: 0 20px;
+      background-color: grey;
+    }
+
+    #green.light {
+      background-color: green;
+    }
+
+    #yellow.light {
+      background-color: yellow;
+    }
+
+    #red.light {
+      background-color: red;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="lamp" id='green'></div>
+    <div class="lamp" id='yellow'></div>
+    <div class="lamp" id='red'></div>
+  </div>
+  <button id="next">next</button>
+</body>
+<script>
+  const next = document.getElementById('next');
+  function show(color) {
+    const lamps = document.getElementsByClassName('lamp');
+    for (let i = 0; i < lamps.length; i++) {
+      let lamp = lamps[i];
+      lamp.classList.remove('light');
+    }
+    curLamp = document.getElementById(color);
+    curLamp.classList.add('light');
+  }
+  function green() {
+    show('green');
+  }
+  function yellow() {
+    show('yellow');
+  }
+  function red() {
+    show('red');
+  }
+
+  // 回掉函数方式 容易引起回调地狱
+  // function go() {
+  //   green();
+  //   setTimeout(() => {
+  //     yellow();
+  //     setTimeout(() => {
+  //       red();
+  //       setTimeout(() => {
+  //         go();
+  //       }, 1000);
+  //     }, 500);
+  //   }, 1000);
+  // }
+
+  // promise方式
+  function sleep(t) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, t);
+    });
+
+  }
+  // 链式表达代替回调式表达
+  // function go() {
+  //   green();
+  //   sleep(1000)
+  //     .then(() => {
+  //       yellow();
+  //       return sleep(500);
+  //     }).then(() => {
+  //       red();
+  //       return sleep(1000);
+  //     }).then(() => {
+  //       go();
+  //     });
+  // }
+
+  // asynec 方式
+  // 让我们可以以传统的同步的语法来做异步的事情
+  async function go() {
+    while (true) {
+      green();
+      await sleep(1000);
+      yellow();
+      await sleep(500);
+      red();
+      await sleep(1000);
+    }
+  }
+
+  function happen(element, event) {
+    return new Promise((resolve) => {
+      element.addEventListener(event, resolve, { once: true });
+    });
+  }
+
+  // 使用promise+async的方式，可以更灵活的控制灯何时亮起
+  // async function go() {
+  //   while (true) {
+  //     green();
+  //     await happen(next, 'click');
+  //     yellow();
+  //     await happen(next, 'click');
+  //     red();
+  //     await happen(next, 'click');
+  //   }
+  // }
+
+  // generate 方法模拟acync
+  // function* go() {
+  //   while (true) {
+  //     green();
+  //     yield sleep(1000);
+  //     yellow();
+  //     yield sleep(500);
+  //     red();
+  //     yield sleep(1000);
+  //   }
+  // }
+
+  // function run(iterator) {
+  //   const { value, done } = iterator.next();
+  //   if (done) return;
+  //   if (value instanceof Promise) {
+  //     value.then(() => {
+  //       run(iterator);
+  //     }
+  //     );
+  //   }
+  // }
+  // function co(generate) {
+  //   return function () {
+  //     return run(generate());
+  //   }
+  // }
+  // go = co(go);
+</script>
+
+</html>
