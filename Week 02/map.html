@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  #mapContainer {
+    width: 500px;
+    height: 500px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .point {
+    width: 3px;
+    height: 3px;
+    border: 1px solid gray;
+  }
+
+</style>
+
+<body>
+  <div id='mapContainer'></div>
+  <button onclick="localStorage.setItem('pointArr',JSON.stringify(pointArr))">save</button>
+</body>
+<script>
+  const mapContainer = document.getElementById('mapContainer');
+  const pointArr = localStorage.getItem('pointArr') ? JSON.parse(localStorage.getItem('pointArr')) : Array(10000).fill(0);
+  let mousedown = false;
+
+  mapContainer.innerHTML = '';
+  const points = document.createDocumentFragment();
+  for (let i = 0; i < 100; i++) {
+    for (let j = 0; j < 100; j++) {
+      let point = document.createElement('div');
+      point.classList.add('point');
+      point.style.backgroundColor = !!pointArr[i * 100 + j] ? '#000' : '#fff';
+      point.addEventListener('mousemove', (e) => {
+        const j = Math.floor(e.clientX / 5);
+        const i = Math.floor(e.clientY / 5);
+        if (mousedown) {
+          pointArr[i * 100 + j] = 1;
+          point.style.backgroundColor = clear ? '#fff' : '#000';
+        }
+      });
+      point.addEventListener('mouseup', onMouseUp);
+      point.addEventListener('mousedown', onMousedown);
+      point.addEventListener('contextmenu', onContextmenu);
+      points.appendChild(point);
+    }
+  }
+  mapContainer.appendChild(points);
+
+
+  function onMouseUp() {
+    mousedown = false;
+    clear = false;
+  }
+
+  function onMousedown(e) {
+    mousedown = true;
+    clear = e.which === 3 ? true : false;
+  }
+
+  function onContextmenu(e) {
+    e.preventDefault();
+  }
+
+  function sleep(t) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, t);
+    });
+  }
+
+
+  class Sorted {
+    constructor(data, compare) {
+      this.data = (data || []).slice();
+      this.compare = compare || ((a, b) => a - b);
+    }
+    // 相当于上节课中的shift 但是这里是取出符合比较条件最小的点
+    take() {
+      if (!this.data.length) {
+        return;
+      }
+      let min = this.data[0];
+      let minIndex = 0;
+      for (let i = 1; i < this.data.length; i++) {
+        if (this.compare(min, this.data[i]) > 0) {
+          min = this.data[i];
+          minIndex = i;
+        }
+      }
+      // slice方法取出最小元素的平均时间复杂度是O(n),下面的方法取出最小的一个元素的方法复杂度是O(1)
+      // 将 mindex出的元素值设置为最后一个元素的值，将最后一个元素pop，然后返回min即可
+      this.data[minIndex] = this.data[this.data.length - 1];
+      this.data.pop();
+      return min;
+    }
+    // 相当于上节课讲的push
+    give(v) {
+      this.data.push(v);
+    }
+  }
+
+
+  // 广度优先搜索
+  // queue 为队列：广度优先搜索 
+  // queue 为栈：深度优先搜索
+  async function findPath(map, start, end) {
+    mapContainer.children[end[0] * 100 + end[1]].style.backgroundColor = 'red';
+
+    var queue = new Sorted([start], (a, b) => distance(a) - distance(b));
+
+    const table = deepClone(map);
+    function distance([x, y]) {
+      return (x - end[0]) ** 2 + (y - end[1]) ** 2;
+    }
+    async function insert(x, y, pre) {
+      //  若超出边界了，则return
+      if (x < 0 || x >= 100 || y < 0 || y >= 100) {
+        return;
+      }
+      // 若是障碍点或者是已经找过了，则return
+      if (table[x * 100 + y]) {
+        return;
+      }
+      await sleep(5);
+      mapContainer.children[x * 100 + y].style.backgroundColor = 'green';
+      //关键点：可以将当前查找到的点所对应的table中的元素的值设置为它的前一个点pre
+      // 那么后面就可以通过这个对应关系只使用一个数组来找出路径
+      table[x * 100 + y] = pre;
+      queue.give([x, y]);
+    }
+    while (queue.data.length) {
+      let [x, y] = queue.take();
+      console.log(x, y);
+      // 若已经找到了终点则return
+      if (x === end[0] && y === end[1]) {
+        let path = [];
+        // 找到终点之后，从终点开始去找它的前一个点,即可找到路径
+        while (x !== start[0] || y !== start[1]) {
+          path.push([x, y]);
+          await sleep(30);
+          mapContainer.children[x * 100 + y].style.backgroundColor = 'purple';
+          [x, y] = table[x * 100 + y];
+        }
+        return path;
+      }
+      // 上下左右
+      await insert(x - 1, y, [x, y]);
+      await insert(x, y - 1, [x, y]);
+      await insert(x + 1, y, [x, y]);
+      await insert(x, y + 1, [x, y]);
+
+      // 斜向
+      await insert(x - 1, y + 1, [x, y]);
+      await insert(x + 1, y + 1, [x, y]);
+      await insert(x - 1, y - 1, [x, y]);
+      await insert(x + 1, y - 1, [x, y]);
+    }
+    return null;
+  }
+  function deepClone(obj) {
+    return Object.create(obj);
+  }
+</script>
+
+</html>
