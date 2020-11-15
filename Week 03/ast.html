@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+  const reg = /([\.\d]+)|([ \t]+)|([\r\n]+)|(\*)|(\/)|(\+)|(\-)/g;
+  const dictionary = ['Number', 'Whitespace', 'LineTerminator', '*', '/', '+', '-'];
+
+  // 词法部分
+  // 使用正则表达式和正则表达式的捕获关系处理词法
+  function* tokenize(source) {
+    let result = null;
+    let lastIndex = 0;
+    //  exec全局匹配特点：数组中第一项为匹配到的结果，后面每一项分别是匹配每一个分组项的结果
+    //  若存在多个匹配，则继续调用exec即可
+    while (true) {
+      lastIndex = reg.lastIndex;
+      result = reg.exec(source);
+      if (!result) break;
+      // 匹配上一种词法，但是中间有不符合格式的字符，break
+      if (reg.lastIndex - lastIndex > result[0].length)
+        break;
+
+      let token = {
+        type: null,
+        value: null
+      }
+
+      for (let i = 1; i <= dictionary.length; i++) {
+        if (result[i]) {
+          token.type = dictionary[i - 1];
+        }
+      }
+
+      token.value = result[0];
+      yield token;
+    }
+    yield { type: 'EOF' };
+  }
+
+  let source = [];
+  for (let token of tokenize('10 + 25 - 2')) {
+    if (token.type !== 'Whitespace' && token.type !== 'LineTerminator') {
+      source.push(token);
+    }
+  };
+
+  function Expression(source) {
+    if (source[0].type === 'AdditiveExpression' && source[1] && source[1].type === 'EOF') {
+      let node = {
+        type: 'Expression',
+        children: [source.shift(), source.shift()]
+      }
+      source.unshift(node);
+      return node;
+    }
+    AdditiveExpression(source);
+    return Expression(source);
+  }
+
+  // 语法树-加法
+  function AdditiveExpression(source) {
+    if (source[0].type === 'MultiplicativeExpression') {
+      let node = {
+        type: 'AdditiveExpression',
+        children: [source[0]]
+      }
+      source[0] = node;
+      // 递归，数字后面可能是+号或者-号
+      return AdditiveExpression(source);
+    }
+
+    if (source[0].type === 'AdditiveExpression' && source[1] && source[1].type === '+') {
+      let node = {
+        type: 'AdditiveExpression',
+        operator: '+',
+        children: []
+      }
+      node.children.push(source.shift());
+      node.children.push(source.shift());
+      // 第三个操作数需要先走一遍乘法语句分析
+      MultiplicativeExpression(source);
+      node.children.push(source.shift());
+      source.unshift(node);
+      return AdditiveExpression(source);
+    }
+
+    if (source[0].type === 'AdditiveExpression' && source[1] && source[1].type === '-') {
+      let node = {
+        type: 'AdditiveExpression',
+        operator: '-',
+        children: []
+      }
+      node.children.push(source.shift());
+      node.children.push(source.shift());
+      // 第三个操作数需要先走一遍乘法语句分析
+      MultiplicativeExpression(source);
+      node.children.push(source.shift());
+      source.unshift(node);
+      return AdditiveExpression(source);
+    }
+
+    if (source[0].type === 'AdditiveExpression') {
+      return source[0];
+    }
+    // 如果都不符合
+    MultiplicativeExpression(source);
+
+
+    return AdditiveExpression(source);
+  }
+
+  // 语法树-乘法
+  function MultiplicativeExpression(source) {
+    if (source[0].type === 'Number') {
+      let node = {
+        type: 'MultiplicativeExpression',
+        children: [source[0]]
+      }
+      source[0] = node;
+      // 递归，数字后面可能是*号或者/号
+      return MultiplicativeExpression(source);
+    }
+
+    if (source[0].type === 'MultiplicativeExpression' && source[1] && source[1].type === '*') {
+      let node = {
+        type: 'MultiplicativeExpression',
+        operator: '*',
+        children: []
+      }
+      node.children.push(source.shift());
+      node.children.push(source.shift());
+      node.children.push(source.shift());
+      source.unshift(node);
+      return MultiplicativeExpression(source);
+    }
+
+    if (source[0].type === 'MultiplicativeExpression' && source[1] && source[1].type === '/') {
+      let node = {
+        type: 'MultiplicativeExpression',
+        operator: '/',
+        children: []
+      }
+      node.children.push(source.shift());
+      node.children.push(source.shift());
+      node.children.push(source.shift());
+      source.unshift(node);
+      return MultiplicativeExpression(source);
+    }
+
+    if (source[0].type === 'MultiplicativeExpression') {
+      return source[0];
+    }
+    // 如果有其他情况，默认递归自己，实际上应该不会有这种情况，应该永远不会执行
+    return MultiplicativeExpression(source);
+  }
+  console.log(Expression(source));
+</script>
+
+</html>
