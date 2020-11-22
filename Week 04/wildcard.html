@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+  function find(source, pattern) {
+    let starCount = 0;
+    for (let i = 0; i < pattern.length; i++) {
+      if (pattern[i] === '*') {
+        starCount++;
+      }
+    }
+    // 如果没有 * 号，则需要一摸一样
+    if (starCount === 0) {
+      for (let i = 0; i < pattern.length; i++) {
+        if (source[i] !== pattern[i] && pattern[i] !== '?') {
+          return false;
+        }
+      }
+      return true;
+    }
+    let i = 0;  // pattern 的位置
+    let lastIndex = 0; // source 的位置
+    // 匹配第一个 * 之前的部分
+    for (i = 0; pattern[i] !== '*'; i++) {
+      if (source[i] !== pattern[i] && pattern[i] !== '?') {
+        return false;
+      }
+    }
+    lastIndex = i;
+    // 匹配第一个 * 号之后，最后一个  * 之前，每段 *的字符
+    for (let p = 0; p < starCount - 1; p++) {
+      i++;
+      let subPattern = ''; // 匹配第一个 * 之后，每个 * 之前的字符
+      while (pattern[i] !== '*') {
+        subPattern += pattern[i];
+        i++;
+      }
+      let reg = new RegExp(subPattern.replace(/\?/g, "[\\s\\S]"), "g");
+      // 正则的 lastIndex 决定了我们在 exec 时从哪个地方开始
+      reg.lastIndex = lastIndex; // 将正则的 lastIndex 改为之前我们自己的 lastIndex,接着之前的匹配继续匹配
+      if (!reg.exec(source)) {
+        return false;
+      }
+
+      lastIndex = reg.lastIndex;
+    }
+    // 匹配尾部字符串
+    // 从最后一个字符开始到最后一个 * 号结束
+    for (let j = 0; source.length - lastIndex > j && pattern[pattern.length - j] !== '*'; j++) {
+      if (pattern[pattern.length - j] !== source[source.length - j] &&
+        pattern[pattern.length - j] !== '?') {
+        return false;
+      }
+    }
+    return true;
+  }
+</script>
+
+</html>

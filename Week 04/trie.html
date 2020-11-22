@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+  let $ = Symbol('$');
+  class Trie {
+    constructor() {
+      this.root = Object.create(null);
+    }
+
+    // 插入字符串
+    insert(word) {
+      let node = this.root;
+      for (let c of word) {
+        if (!node[c]) {
+          node[c] = Object.create(null);
+        }
+        node = node[c];
+      }
+      // 若此字符串没有终结符，即还没出现过此字符串，则给它的最后一个树节点置为0
+      if (!($ in node)) {
+        node[$] = 0;
+      }
+      // 若已存在，表示有重复字符串，加一
+      node[$]++;
+    }
+
+    // 出现次数最多的字符串，以及出现了多少次
+    most() {
+      let max = 0;
+      let maxWord = '';
+      let visit = (node, word) => {
+        if (node) {
+          // 一个节点最多只有一个终止字符串子节点。因为在 insert 时，若已存在 $ 将不会再继续插入。
+          // 故如果该节点具有终止子字符串，先判断该已终止的字符串的重复次数是否大于max当前值，
+          // 但是，该节点还可能有其他的非终止字符串的子节点，表示该节点上的字符没有终止，所以，后面再去对其它子节点调用 visit 方法
+          if (node[$] && node[$] > max) {
+            max = node[$];
+            maxWord = word;
+          }
+          // 再遍历其他子节点
+          for (let i of Object.keys(node)) {
+            visit(node[i], word + i);
+          }
+        }
+      }
+      visit(this.root, '');
+      console.log(maxWord, max);
+    }
+  }
+
+  function randomWord(length) {
+    let s = '';
+    for (let i = 0; i < length; i++) {
+      s += String.fromCharCode(Math.random() * 26 + 'a'.charCodeAt(0));
+    }
+    return s;
+  }
+
+  let trie = new Trie();
+  for (let i = 0; i < 10000; i++) {
+    trie.insert(randomWord(4));
+  }
+
+</script>
+
+</html>
