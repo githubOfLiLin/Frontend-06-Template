@@ -1,0 +1,98 @@
+<!-- container 中的文字是没有分节点的，所以我们需要利用 Range 去找到能拖拽的空位 -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <div id="container">
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字
+  </div>
+  <div id="dragbale"
+    style="display: inline-block; width: 100px;height: 100px;background-color: pink;"></div>
+</body>
+<script>
+  const dragbale = document.getElementById('dragbale');
+  // 记录下上次拖拽的量，使得多次拖拽表现正确
+  let baseX = 0;
+  let baseY = 0;
+
+  // 监听 dargble的mousedown里面去监听 mousemove ,在性能上和逻辑上都是正确的
+  dragbale.addEventListener('mousedown', event => {
+    const startX = event.clientX;
+    const startY = event.clientY;
+    let up = event => {
+      baseX = baseX + event.clientX - startX;
+      baseY = baseY + event.clientY - startY
+      document.removeEventListener('mousemove', move)
+      document.removeEventListener('mouseup', up)
+    }
+    // 使用transform使其动起来
+    let move = event => {
+      const range = getNearest(event.clientX, event.clientY);
+      range.insertNode(dragbale); // Range.insertNode： 向 range 中插入一个节点，默认会将该 range 中之前的内容移除
+      // dragbale.style.transform = `translate(${baseX + event.clientX - startX}px,${baseY + event.clientY - startY}px)`
+    }
+    // 在document上监听 mousemove和mouseup事件，防止鼠标拖得太快，如果在dargble上监听，就会出现监听不到的现象
+    document.addEventListener('mousemove', move)
+    document.addEventListener('mouseup', up)
+  })
+
+  const container = document.getElementById('container');
+  const ranges = [];
+  // 将每个文字的 range 存起来
+  for (let i = 0; i < container.childNodes[0].textContent.length; i++) {
+    let range = document.createRange();
+    range.setStart(container.childNodes[0], i);
+    range.setEnd(container.childNodes[0], i);
+    // console.log(range.getBoundingClientRect()); // CSSOM API
+    ranges.push(range);
+  }
+
+  // 找离鼠标点最近的一个 Range
+  function getNearest(x, y) {
+    let min = Infinity; // Infinity: 超出js数字范围的数 Infinity为大于最大范围的数，-Infinity为小于最小范围的数
+    let nearestRange = null;
+    for (let range of ranges) {
+      let react = range.getBoundingClientRect(); // getBoundingClientRect返回一个对象，该对象是一个将范围内所有元素的边界矩形包围起来的矩形
+      const distance = (x - react.x) ** 2 + (y - react.y) ** 2;
+      if (distance < min) {
+        min = distance;
+        nearestRange = range;
+      }
+    }
+    return nearestRange;
+  }
+
+  // 移动时阻止触发 document 的 preventDefault 事件
+  document.addEventListener('selectstart', event => event.preventDefault());
+
+</script>
+
+</html>

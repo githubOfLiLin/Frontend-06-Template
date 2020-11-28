@@ -1,0 +1,104 @@
+<!-- 实现 reactive 和 effect 并以调色盘为例，实现双向绑定 -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <input id="r" type="range" min="0" max="255">
+  <input id="g" type="range" min="0" max="255">
+  <input id="b" type="range" min="0" max="255">
+  <div id="color" style="width: 100px;height: 100px;"></div>
+</body>
+<script>
+  let callbacks = new Map(); // 存储每个对象下的每个属性所相关的回调函数
+  let usedreactivties = [];
+  let reactivties = new Map(); // 调用 reactive 时，加一个缓存
+  const obj = {
+    r: 0,
+    g: 0,
+    b: 0
+  }
+  const po = reactive(obj);
+  // vue  一个 API: effect，可以传入一个回调函数去监听 po 的一个属性
+  // 由数据到 dom
+  effect(() => {
+    document.getElementById('r').value = po.r;
+  })
+  effect(() => {
+    document.getElementById('g').value = po.g;
+  })
+  effect(() => {
+    document.getElementById('b').value = po.b;
+  })
+
+  effect(() => {
+    document.getElementById('color').style.backgroundColor = `rgb(${po.r},${po.g},${po.b})`;
+  })
+
+  // 绑定事件，由 dom 到数据
+  document.getElementById('r').addEventListener('input', event => po.r = event.target.value);
+  document.getElementById('g').addEventListener('input', event => po.g = event.target.value);
+  document.getElementById('b').addEventListener('input', event => po.b = event.target.value);
+
+
+
+  // 实现 effect，将传入的回调函数放入一个数组中，
+  // 在set时，当相关的属性变化时，去调用这些回调函数
+  // 检测回调函数都依赖了哪些对象及其属性，可以先调用一下 callback，其所依赖的属性一定会在 po 中的 get 中被拦截 (这一条很关键，很有意思)
+  // 然后在 get 里去将其所以来的对象及属性保存至 usedreactivties 里
+  // 为了在 set 中准确对应上每个属性所相关的回调函数，需要一个数据结构：将每个被依赖过的属性的回调函数都保存起来
+  // callbacks: 对象--属性--该属性的回调函数
+  function effect(callback) {
+    // callbacks.push(callback); // 粗糙的实现，set 中每一个回调函数都调用一下
+    usedreactivties = [];
+    callback();
+    // 相对精细的实现：set 中只调用与当前对象当前属性相关的所有回调函数
+    for (const reactivity of usedreactivties) {
+      const object = reactivity[0];
+      const prop = reactivity[1];
+      if (!callbacks.has(object)) {
+        callbacks.set(object, new Map())
+      }
+      const mapofObject = callbacks.get(object);
+      if (!mapofObject.has(prop)) {
+        mapofObject.set(prop, [])
+      }
+      const mapofprop = mapofObject.get(prop);
+      mapofprop.push(callback);
+    }
+  }
+
+  function reactive(obj) {
+    // 进行一个缓存
+    if (reactivties.has(obj)) {
+      return reactivties.get(obj)
+    }
+    let proxy = new Proxy(obj, {
+      set(object, pro, val) {
+        obj[pro] = val;
+        if (callbacks.get(obj) && callbacks.get(obj).get(pro)) {
+          for (let callback of callbacks.get(obj).get(pro)) {
+            callback();
+          }
+        }
+        return obj[pro];
+      },
+      get(object, pro) {
+        usedreactivties.push([object, pro]);
+        if (typeof object[pro] === 'object') {
+          return reactive(object[pro]);
+        }
+        return obj[pro];
+      }
+    })
+    reactivties.set(obj, proxy);
+    return proxy;
+  }
+</script>
+
+</html>
