@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+  class Person {
+    constructor(name) {
+      this.isHurt = false;
+      this.damage = 0;
+      this.name = name;
+    }
+    hurt(damage) {
+      this.isHurt = true;
+      this.damage = damage;
+      console.log(`${this.name} is hurt in ${damage} 处`);
+    }
+  }
+
+  class Dog {
+    constructor(name) {
+      this.damage = 0;
+    }
+    bit() {
+      this.damage++;
+    }
+  }
+
+  const dog = new Dog();
+  for (let i = 0; i < 5; i++) {
+    dog.bit();
+  }
+  const person = new Person('小李');
+  person.hurt(dog.damage);
+</script>
+
+</html>
