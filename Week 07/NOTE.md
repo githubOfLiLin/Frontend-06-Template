@@ -118,7 +118,30 @@ number和boolean之间的转换：
 对象装箱和开箱操作
 装箱：
 new Number()、new String() (注：只有前面加 new 才会返回一个对象，如果直接调用 Number()则返回一个数字)
-1.toString()  会隐式的进行装箱转换，把1转换为Number对象,调用其Number对象的toString方法
+1.toString()  会隐式的进行装箱转换，把1转换为Number对象,调用其Number对象的toString方法    
+class 体内部的代码总是在严格模式下执行，所以当调用 class 静态或原型方法时没有指定 this 的值，那么方法内的 this 值将被置为 undefined。
+
+```
+class Animal {
+  speak() {
+    return this;
+  }
+  static eat() {
+    return this;
+  }
+}
+
+let obj = new Animal();
+obj.speak(); // Animal {}
+let speak = obj.speak;
+speak(); // undefined
+
+Animal.eat() // class Animal
+let eat = Animal.eat;
+eat(); // undefined
+```
+
+如果上述代码通过传统的基于函数的语法来实现，那么依据初始的 this 值，在非严格模式下方法调用会发生自动装箱。若初始值是 undefined，this 值会被设为全局对象。
 
 
 ### 运行时
@@ -162,7 +185,7 @@ VariableDeclaration:普通变量声明
 ClassDeclaration      
 LexicalDeclaration: let、const     
 
-class、const、let: 在声明之前使用会报错
+class、const、let: 在声明之前使用会报错，函数声明和类声明之间的一个重要区别在于, 函数声明会提升，类声明不会。   
 function、function*、 async function、async function*、var: 可在声明之前使用，且没有块级作用域，只有全局作用域函数作用域。   
 
 在块级作用域内，let 声明的变量，创建被提升，但初始化没有被提升，在初始化之前被使用，就会形成暂时性死区，报错。    
