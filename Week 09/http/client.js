@@ -1,4 +1,6 @@
 const net = require('net');
+const { parseHTML } = require('../parser');
+console.log('parseHTML', parseHTML);
 // Content-Type 请求头是必须要有的
 // body 也是一个 key：value的格式
 // 不同的 Content-Type 会影响 body 的内容
@@ -218,4 +220,6 @@ void async function () {
   })
   let res = await req.send();
   console.log('res', res);
+  parseHTML(res.body);
+
 }();
