@@ -1,8 +1,5 @@
-// css 模块可以解析 css 
 let css = require('css');
-
 const EOF = Symbol('EOF');
-const layout = require('./layout.js');
 // 每一个 tag 当作一个 token 处理
 let currentToken = null;
 let currentAttribute = null;
@@ -42,8 +39,6 @@ function emit(token) {
         // 只考虑 style 标签样式
         addCssRules(top.children[0].content);
       }
-      // 在 标签结束之前，就能够获取到该标签的所有子元素了，flex 布局是与子元素相关的，所以在此处应用布局
-      layout(top);
       stack.pop(top);
     } else {
       throw new Error("tag start end doesn't match ");

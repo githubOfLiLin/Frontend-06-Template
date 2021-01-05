@@ -99,27 +99,36 @@ function find2(str) {
 }
 
 // KMP
-function find2(str) {
-  str = 'abcdabcdabef'
+function find3(str) {
   let pattern = 'abcdabef';
   let step = 0;
 
-  let table = [];
-  for (let c of pattern) {
-
+  let table = new Array(pattern.length).fill(0);
+  let j = 0;
+  for (let i = 1; i < pattern.length; i++) {
+    if (pattern[i] === pattern[j]) {
+      j++;
+      table[i + 1] = j;
+    } else {
+      j = table[j];
+    }
   }
 
-  for (let c of str) {
-    if (c === pattern[step]) {
+  let m = 0
+  while (m < str.length) {
+    if (str[m] === pattern[step]) {
       step++;
       if (step === pattern.length) {
         return true;
       }
+      m++;
     } else {
-      step = 0;
+      step = table[step];
     }
   }
   return false;
 }
 
-console.log(find2('dabcdefs'));
+console.log(find3('abcdabcdabef'));
+
+
