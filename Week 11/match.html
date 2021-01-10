@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <div>
+    <span></span>
+    <div id="id" class="class">
+
+    </div>
+  </div>
+  <script>
+    function start(c) {
+      if (c.match(/[a-z_\-0-9\s]/)) {
+        // 状态复用
+        return selectorName(c);
+      } else {
+        throw new Error('error');
+      }
+
+    }
+
+    function selectorName(c) {
+      if (c.match(/[a-z_\-0-9]/)) {
+        curSelectorName += c;
+        return selectorName;
+      }
+      if (c.match(/\./)) {
+        curtarget.classNames.push([...curSelectorName].reverse().join(''));
+        curSelectorName = '';
+        return selectorName;
+      }
+      if (c.match(/#/)) {
+        curtarget.id = [...curSelectorName].reverse().join('');
+        curSelectorName = '';
+        return selectorName;
+      }
+      // 祖先选择器
+      if (c.match(/\s/)) {
+        curtarget.type = [...curSelectorName].reverse().join('');
+        curtarget.forefather = curtarget.forefather || {};
+        // 将当前元素设置为祖先元素，之后对祖先元素的选择器进行解析
+        curtarget = curtarget.forefather;
+        console.log('curtarget', curtarget);
+        curSelectorName = '';
+        return selectorName;
+      }
+      // 以下与祖先元素的解析同理，主要是递归思想
+      if (c.match(/>/)) {
+        curtarget.type = [...curSelectorName].reverse().join('');
+        curtarget.parent = curtarget.parent || {};
+        curtarget = curtarget.parent;
+        curSelectorName = '';
+        return selectorName;
+      }
+      if (c.match(/~/)) {
+        curtarget.type = [...curSelectorName].reverse().join('');
+        curtarget.sibling = curtarget.sibling || {};
+        curtarget = curtarget.sibling;
+        curSelectorName = '';
+        return selectorName;
+      }
+      if (c.match(/\+/)) {
+        curtarget.type = [...curSelectorName].reverse().join('');
+        curtarget.directsibling = curtarget.directsibling || {};
+        curtarget = curtarget.directsibling;
+        curSelectorName = '';
+        return selectorName;
+      }
+    }
+
+    function end() {
+      if (curSelectorName) {
+        curtarget.type = [...curSelectorName].reverse().join('');
+      }
+      console.log('target', target);
+    }
+
+    let target = {
+      id: '',
+      classNames: [],
+      type: '',
+      parent: {},
+      sibling: {},
+      directsibling: {},
+      forefather: {}
+    }
+    let curSelectorName = '';
+    let curtarget = target;
+
+    // 通过状态机解析 selector，获取到目标元素具体的 id,class,tagName,parent,祖先,直接相邻元素,兄弟元素等关键信息
+    function getSelectorDetail(selector) {
+      state = start;
+      const reverseSelector = [...selector].reverse();
+      for (let c of reverseSelector) {
+        state = state(c);
+      }
+      end();
+    }
+    // 通过解析好的 selectordetail 来检查 element 是否与其匹配
+    function match(selector, element) {
+      getSelectorDetail(selector);
+      function matchCurelement(target, element) {
+        if (target.type && element.tagName !== upperCase(target.type)) {
+          return false;
+        }
+        if (target.id && element.id !== target.id) {
+          return false;
+        }
+        if (target.classNames && target.classNames.length) {
+          for (let className of target.classNames) {
+            if (!element.className.includes(className)) {
+              return false;
+            }
+          }
+        }
+        // 父元素
+        if (target.parent) {
+          if (!matchCurelement(target.parent, element.parentElement)) {
+            return false;
+          }
+        }
+        // 直接兄弟元素
+        if (target.directsibling) {
+          if (!matchCurelement(target.directsibling, element.previousElementSibling)) {
+            return false;
+          }
+        }
+        // 兄弟元素
+        if (target.sibling) {
+          let res = false;
+          let node = element.previousElementSibling;
+          while (node) {
+            res = matchCurelement(target.sibling, node);
+            if (res) {
+              break;
+            }
+            node = node.previousElementSibling;
+          }
+          if (!res) {
+            return false;
+          }
+        }
+        // 祖先元素
+        if (target.forefather) {
+          let res = false;
+          let node = element.parentElement;
+          while (node) {
+            res = matchCurelement(target.forefather, node);
+            if (res) {
+              break;
+            }
+            node = node.parentElement;
+          }
+          if (!res) {
+            return false;
+          }
+        }
+        return true;
+      }
+      return matchCurelement(target, element);
+    }
+
+    // 将字符串的字符全部转换为大写字符
+    function upperCase(str) {
+      let arr = str.split("");
+      let newStr = "";
+      // 通过数组的forEach方法来遍历数组
+      arr.forEach(function (value) {
+        if (value >= 'a' && value <= 'z')
+          newStr += value.toUpperCase();
+        else
+          newStr += value;
+      });
+      return newStr;
+    }
+
+    console.log(match('body>div>#id.class', document.getElementById('id')));
+
+  </script>
+</body>
+
+</html>

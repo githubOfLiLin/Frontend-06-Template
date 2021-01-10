@@ -27,3 +27,5 @@ Cross:width,x,left,right;
 样式预处理知识点：   
 * order 属性决定 flex-item 的排列先后顺序，故在预处理阶段要先根据 order 属性对子元素进行排序。   
 * 根据 flex-direction 和 flex-wrap 计算出主轴和交叉轴相关的属性(即 Main 和 Cross)   
+
+### 收集元素进行

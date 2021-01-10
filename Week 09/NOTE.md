@@ -1,6 +1,6 @@
 学习笔记
 ### 解析 HTML，构建 DOM 树
-使用 FSM 实现 HTML 的解析
+使用 FSM (Finite State Machine 有限状态机)实现 HTML 的解析
 HTML 文档中，已经规定了 HTML 的状态
 Toy browser 只挑选部分状态来实现
 
