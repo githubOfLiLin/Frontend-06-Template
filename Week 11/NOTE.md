@@ -98,7 +98,9 @@ value中可以使用一些函数：calc() min() max() attr() linear-gradient()�
 1. 主要用了状态机的思想，解析 selector, 将id,class,tagName,parent,祖先,父元素,兄弟，直接相邻兄弟保存在对象中。同时祖先,父元素,兄弟，直接相邻兄弟也是相同结构的对象。这里也用到了递归状态机的思想。   
 2. 根据解析出的selector，来获取element上对应的属性，与selector进行匹配，匹配不到则返回 false, 全部匹配则返回 true.   
 
-
-
+first-line 为什么不能设置 float 等属性，而 first-letter 可以：
+first-line 指的是 排版阶段的 第一行. 作用的对象是每一个字符(文字流). 如果有float 属性，则会与其定义相矛盾. first-line 是存在于正常流中的.float是脱离正常流的.     
+假设first-line 伪类可以应用float属性，此时first-line 指定的内容会自动脱离正常流，指定的内容不再是 first-line，然后浏览器会在剩余的内容中继续选取新的 first-line，然后继续脱离正常流。如此往复，产生循环.直至所有内容都被float为止.     
+这是毫无价值的逻辑，所以first-line不能设置float     
 
 

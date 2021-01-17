@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<style>
+  /* 在动画的帧定义中，可以使用transition，可以改变每一帧的时间曲线 */
+  @keyframes mykf {
+    0% {
+      top: 0;
+      transition: top ease
+    }
+
+    25% {
+      top: 30px;
+      transition: top ease-in
+    }
+
+    50% {
+      top: 10px;
+      transition: top ease-out
+    }
+
+    100% {
+      top: 0;
+      transition: top linear
+    }
+  }
+
+  .animation {
+    position: absolute;
+    top: 0;
+    animation: mykf 1s;
+    width: 100px;
+    height: 100px;
+    background-color: plum;
+  }
+
+  .button {
+    width: 60px;
+    height: 20px;
+    border: 1px solid hsl(60, 95%, 45%);
+  }
+
+</style>
+
+<body>
+  <!-- BFC折叠与float的影响 -->
+  <!-- 当BFC折叠时(这里是overflow:visible)，同时存在float元素时，发生 BFC折叠的元素就像不存在一样，里面的文字会环绕float元素排列 -->
+  <!-- 当BFC不折叠时，同时存在float元素时，BFC里面的文字会在盒内部排列，不会环绕float元素 -->
+  <div style="float: right;width: 100px;height: 100px; background-color: powderblue;"></div>
+  <div style="overflow: visible;background-color: rosybrown;">
+    文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+  </div>
+
+  <!-- BFC折叠与margin折叠的影响 -->
+  <!-- 当BFC折叠时(这里是overflow:visible)，折叠的BFC里面的元素会与它外面的元素产生边距折叠，就当折叠BFC不存在一样 -->
+  <!-- 当BFC不折叠时，BFC里面的元素与外面的元素不属于同一个BFC了，不会与其产生边距折叠 -->
+  <div style="width: 100px;height: 100px; background-color: powderblue;margin-bottom: 20px;"></div>
+  <div style="margin-top: 20px;overflow: hidden;;background-color: rosybrown;">
+    <div style="width: 100px;height: 100px;margin-top: 20px;background-color: powderblue;"></div>
+  </div>
+
+  <!-- 动画 -->
+  <div class="animation"></div>
+  <div class="button"></div>
+</body>
+
+</html>
