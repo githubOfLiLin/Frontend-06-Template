@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=\, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="./index.css">
+  <style>
+    #a {}
+
+  </style>
+</head>
+
+
+<body>
+  <!-- 语义化标签 -->
+  <div>
+    &amp; &quot; &lt; &gt;
+    <abbr>www</abbr>
+    <strong>The www</strong>
+    一个<em>苹果</em>
+    <figure>
+      <img src="" alt="">
+      <figcaption>figcaption</figcaption>
+    </figure>
+    <dfn>定义</dfn>
+  </div>
+  <!-- 逆序排列子元素 -->
+  <div id="a">
+    <span>1</span>
+    <span>2</span>
+    <span>3</span>
+    <span>4</span>
+    <span>5</span>
+  </div>
+  <!-- 创建新窗口 -->
+  <button
+    onclick="window.w=window.open('about:blank','blank','width=100,height=100,left=100,top=10')">open
+    window</button>
+  <button onclick="window.w.resizeBy(20,20)">resize</button>
+  <button onclick="window.w.moveBy(20,20)">move</button>
+</body>
+<script>
+  /*******逆序排列子元素*********/
+  const element = document.getElementById('a');
+  // 节点API实现reverse
+  function reverseChildren(element) {
+    let l = element.childNodes.length;
+    while (l-- > 0) {
+      // appendChild为添加最后一个子节点，该函数逻辑为：循环把前面的节点移动到后面，实现逆序
+      element.appendChild(element.childNodes[l]);
+    }
+  }
+
+  // range 和 fragment 实现 reverse
+  // 对 fragment 进行的操作不会发生重排
+  function reverseChildren1(element) {
+    const range = new Range();
+    range.selectNodeContents(element);
+    const fragment = range.extractContents(); // extractContents 会创建一个 fragment
+    let l = fragment.childNodes.length;
+    while (l-- > 0) {
+      // appendChild为添加最后一个子节点，该函数逻辑为：循环把前面的节点移动到后面，实现逆序
+      fragment.appendChild(fragment.childNodes[l]);
+    }
+    element.appendChild(fragment);
+  }
+  reverseChildren1(element);
+  /*******逆序排列子元素*********/
+
+  // document.body.onmouseup = () => {
+  //   let range = document.getSelection().getRangeAt(0);
+  //   console.log('range', range);
+  // };
+
+  // styleSheets
+  console.log('styleSheet', document.styleSheets[1].cssRules);
+  document.styleSheets[1].cssRules[0].style.background = 'red'
+</script>
+
+</html>
