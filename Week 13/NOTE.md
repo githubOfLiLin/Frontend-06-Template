@@ -202,3 +202,13 @@ window:
 * getBoundingClientReact 一定只会去到一个盒
 
 ### 其他浏览器 API
+
+### API 分类
+1. DOM API: 用于查询或操作文档节点
+2. CSSOM API: 用于查询或操作文档的 CSSOM，包括 styleSheets 和 CSSOM View
+3. 从服务器获取数据的API: 如 XMLHttpRequest 和 Fetch API
+4. 用于绘制和操作图形的API: 允许您以编程方式更新包含在HTML canvas 元素中的像素数据以创建 2D 和 3D 场景的 Canvas 和 WebGL
+5. 音频和视频API
+6. 设备API: 是以对网络应用程序有用的方式操作和检索现代设备硬件中的数据的API，如 Notifications API
+7. 客户端存储API：如果您想创建一个应用程序来保存页面加载之间的状态，甚至让设备在处于脱机状态时可用，那么在客户端存储数据将会是非常有用。如 Web Storage 和 IndexedDB API
+
