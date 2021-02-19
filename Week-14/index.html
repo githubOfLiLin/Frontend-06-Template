@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <!-- class: 设置类名时可以使用 Attribut class -->
+  <!-- style: 通过 Attribut 设置的时候可以是字符串 -->
+  <div class="div1" style="background-color: khaki;"></div>
+  <!-- href: 通过 Attribut 设置 -->
+  <a href="//m.taobao.com"></a>
+  <!-- input value: Attribute 相当于只是一个默认值-->
+  <input value="cute">
+  <script>
+    const div1 = document.getElementsByClassName('div1')[0];
+    // 但通过 property读取时，因为 class 是关键字，所以用的是 className
+    console.log(div1.className);
+    console.log(div1.style); // 通过 property 得到的是语义化后的对象 
+    const a = document.getElementsByTagName('a')[0];
+    console.log(a.href);  // 通过 property 读取: file://m.taobao.com/ 经过处理的url
+    console.log(a.getAttribute('href')); // m.taobao.com 与  html 上设置的一样
+    const input = document.getElementsByTagName('input')[0];
+    console.log(input.value); // cute
+    console.log(input.getAttribute('value')); // cute
+    input.value = 'new cute'; // 通过  Property 设置 value，显示的是 新值
+    console.log(input.value); // new cute
+    console.log(input.getAttribute('value')); // cute 设置过 input 的 value，Property 会变，但是 Attribute 不会变
+    input.setAttribute('value', 'cuteeeee'); // 
+    console.log(input.value); // new cute
+    console.log(input.getAttribute('value')); // cuteeeee 但是显示还是 new cute
+    // Attribute 可以设置默认值，Property可以改变 input 的显示
+  </script>
+</body>
+
+</html>
