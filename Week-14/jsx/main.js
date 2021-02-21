@@ -80,7 +80,7 @@ let d = [
   "./image/4.jpg"
 ]
 
-let a = <Carousel src={d}></Carousel>
+let a = <Carousel src={d} ></Carousel>
 
 a.mountTo(document.body);
 
